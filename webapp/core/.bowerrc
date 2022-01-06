@@ -1,3 +1,5 @@
 {
-    "directory": "src/main/public/static/bower_components/"
+    "directory": "src/main/public/static/bower_components/",
+     "proxy":"http://web-proxy.am.softwaregrp.net:8080",
+     "https-proxy":"http://web-proxy.am.softwaregrp.net:8080"
 }

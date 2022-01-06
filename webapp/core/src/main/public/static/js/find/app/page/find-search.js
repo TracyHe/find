@@ -115,9 +115,9 @@ define([
                             this.toggleExpandedState(true);
 
                             // Create a tab if the user has run a search but has no open tabs
-                            if(this.selectedTabModel.get('selectedSearchCid') === null) {
-                                this.createNewTab(this.searchModel.get('inputText'));
-                            }
+                            //if(this.selectedTabModel.get('selectedSearchCid') === null) {
+                            //    this.createNewTab(this.searchModel.get('inputText'));
+                           // }
                         }
                     });
 
