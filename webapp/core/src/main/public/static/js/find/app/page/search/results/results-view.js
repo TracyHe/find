@@ -82,45 +82,12 @@ define([
                     //   otherwise the preview pane will toggle every time you try and select something.
                     return;
                 }
-/*
-                const $target = $(e.target);
-
-                if (!$target.is('a')) {
-                    const $result = $ (e.currentTarget).closest('.main-results-container');
-
-                    if ($result.hasClass('selected-document')) {
-                        this.previewModeModel.set({document: null});
-                    } else {
-                        const cid = $result.data('cid');
-                        const isPromotion = $result.closest('.main-results-list').hasClass('promotions');
-                        const collection = isPromotion ? this.promotions : this.documentsCollection;
-                        const model = collection.get(cid);
-
-                        const url = model.get('url');
-                        console.log(this.previewModeModel.get('mode'));
-                        console.log(this.editingDocumentSelection());
-
-                        if (url) {
-                        window.open(url,'_blank')
-                        return;
-                        }
-
-                        this.previewModeModel.set({document: model});
-
-                        if (!isPromotion) {
-                              events().preview(collection.indexOf(model) + 1);
-                        }
-
-                    }
-                }
-
-*/
                 const $target = $(e.target);
                 const $result = $(e.currentTarget).closest('.main-results-container');
                 const isSelected = $result.hasClass('selected-document');
                 const cid = $result.data('cid');
                 const isPromotion = $result.closest('.main-results-list').hasClass('promotions');
-                console.log('preview click'+cid)
+                //console.log('preview click'+cid)
 
                 if (this.editingDocumentSelection()) {
 
@@ -131,7 +98,7 @@ define([
                         // document selection reuses the selected-document class, just styled
                         // differently, and possibly applied to multiple documents
                         const reference = this.documentsCollection.get(cid).get('reference');
-                        console.log(reference);
+                        //console.log(reference);
                         if (isSelected) {
 
                             this.queryState.documentSelectionModel.exclude(reference);
@@ -153,7 +120,7 @@ define([
                     this.previewModeModel.set({mode: null});
 
                 } else {
-                    console.log("Step D"+cid);
+                    //console.log("Step D"+cid);
 
                     // enable/choose another preview view
                     const collection = isPromotion ? this.promotionsCollection : this.documentsCollection;
@@ -165,38 +132,38 @@ define([
 
                     if (!isPromotion) {
 
-                        if (dbname === 'SharePointPCP') {
-                            console.log('SharePointPCP1'+this.previewModeModel.get('mode'));
+                        if (dbname&&this.disablePreview.includes(dbname)) {
+
 
                             //this.previewModeModel.set({document: null});
                             this.previewModeModel.set({mode: null});
-                            //this.previewModeModel.set({mode: 'nopreview', document: null});
+
                             //this.$('.main-results-container').removeClass('selected-document');
                             window.open(url,'_blank')
 
                             //return;
                             this.previewModeModel.set({document: model});
-                            console.log('SharePointPCP2'+this.previewModeModel.get('mode'));
 
-                            //this.previewModeModel.set({document: model});
+
+
                         }
                         else
                         {
-                            console.log('Other DB'+this.previewModeModel.get('mode'));
+
                             this.previewModeModel.set({mode: 'summary', document: model});
 
 
-                            console.log('Other DB'+this.previewModeModel.get('mode'));
+
                         }
                          events().preview(collection.indexOf(model) + 1);
-                         console.log('next');
+
                     }
                 }
               },
 
 
             'click .document-detail-mode [data-cid]': function(e) {
-                console.log("Step E");
+
                 if (String(window.getSelection()).length >= 2) {
                     // If the user is partway selecting text for selection-entity-search, we suppress the click.
                     return;
@@ -211,15 +178,12 @@ define([
             },
 
             'click .end-document-selection-button': function () {
-                console.log("Step F");
+
                 this.queryModel.set('editingDocumentSelection', false);
             }
         },
 
         initialize: function(options) {
-
-
-
             this.fetchStrategy = options.fetchStrategy;
             this.documentRenderer = options.documentRenderer;
 
@@ -242,11 +206,11 @@ define([
             // Preview mode is enabled when a preview mode model is provided
             this.previewModeModel = options.previewModeModel;
 
-            console.log('initialize');
-            Object.keys(this.previewModeModel).forEach(key =>{
-               console.log("key:",key);
-               console.log("value:",this.previewModeModel[key]);
-            })
+
+            //Object.keys(this.previewModeModel).forEach(key =>{
+            //   console.log("key:",key);
+            //   console.log("value:",this.previewModeModel[key]);
+            //})
             if (this.indexesCollection) {
                 this.selectedIndexesCollection = options.queryState.selectedIndexes;
             }
@@ -277,6 +241,11 @@ define([
                     queryModel: this.queryModel
                 })
             }
+            if (config && config.uiCustomization && config.uiCustomization.disablePreview){
+                this.disablePreview = config.uiCustomization.disablePreview;
+                //console.log('disablepreviewdbs:'+this.disablePreview);
+            }
+
 
             this.resultsNumberView = new ResultsNumberView({
                 documentsCollection: this.documentsCollection
@@ -397,11 +366,9 @@ define([
             }
 
             if (this.previewModeModel) {
-                console.log('changing');
                 this.$('.main-results-content').addClass('preview-mode');
                 this.updateSelectedDocument();
             } else {
-                console.log('changing2');
                 this.$('.main-results-content').addClass('document-detail-mode');
             }
 
@@ -480,7 +447,7 @@ define([
          * selection.
          */
         updateDocumentSelection: function () {
-        console.log('update1');
+
             if (!this.editingDocumentSelection()) {
                 return;
             }
@@ -503,19 +470,13 @@ define([
         updateSelectedDocument: function() {
 
             if (this.editingDocumentSelection()) {
-                console.log('update4')
                 return;
             }
 
             this.$('.main-results-container').removeClass('selected-document');
-            console.log('update2');
-            Object.keys(this.previewModeModel).forEach(key =>{
-               console.log("key:",key);
-               console.log("value:",this.previewModeModel[key]);
-            })
+
             if(this.previewModeModel){
                 if (this.previewModeModel.get('mode') === 'summary') {
-                    console.log('update3');
                     this.setDocumentSelected(this.previewModeModel.get('document'), true);
                 }
             }

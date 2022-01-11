@@ -40,6 +40,7 @@ import java.util.Optional;
 public class UiCustomization implements ConfigurationComponent<UiCustomization> {
     private final UiCustomizationOptions options;
     private final Collection<String> filterOrder;
+    private final Collection<String> disablePreview;
     @Singular("defaultDeselectedDatabase")
     private final Collection<String> defaultDeselectedDatabases;
     @Singular("parametricNeverShowItem")
@@ -87,6 +88,9 @@ public class UiCustomization implements ConfigurationComponent<UiCustomization> 
                 .filterOrder(CollectionUtils.isNotEmpty(filterOrder)
                                             ? filterOrder
                                             : uiCustomization.filterOrder)
+                .disablePreview(CollectionUtils.isNotEmpty(disablePreview)
+                                            ? disablePreview
+                                            : uiCustomization.disablePreview)
                 .openSharedDashboardQueryAsNewSearch(openSharedDashboardQueryAsNewSearch != null
                                             ? openSharedDashboardQueryAsNewSearch
                                             : uiCustomization.openSharedDashboardQueryAsNewSearch)
