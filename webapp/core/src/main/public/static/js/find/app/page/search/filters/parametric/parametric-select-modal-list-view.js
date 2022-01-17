@@ -15,7 +15,9 @@ define([
 
     // Height above the bottom of the element at which infinite scroll occurs in pixels
     const INFINITE_SCROLL_OFFSET = 30;
-
+    function searchMatches(text, search) {
+            return text.toLowerCase().indexOf(search.toLowerCase()) > -1;
+        };
     return Backbone.View.extend({
         className: 'full-height tab-pane',
 
@@ -45,12 +47,28 @@ define([
 
             'ifClicked .parametric-value-label': function (e) {
                 this.paginator.toggleSelection($(e.currentTarget).attr('data-value'));
+            },
+
+            'keyup input': function(e) {
+                e.preventDefault();
+                const search = this.$input.val();
+                //const matches = this.paginator.valuesCollection.filter(function (model) {
+                //return searchMatches(model.get('displayValue'),search);
+                //    });
+                $('ul.values-list li').each(function( index ) {
+                  if($(this).text() && $(this).text().toLowerCase().indexOf(search) > -1){
+                    //console.log( index + ": " + $( this ).text() );
+                    $(this).removeClass('hide');
+                  }else
+                  {
+                    $(this).addClass('hide');
+                  }
+                });
             }
-        },
+    },
 
         initialize: function (options) {
             this.paginator = options.paginator;
-
             this.listView = new ListView({
                 collection: this.paginator.valuesCollection,
                 ItemView: ItemView,
@@ -58,7 +76,6 @@ define([
                     selected: 'updateSelected'
                 }
             });
-
             // Check scroll when values are added in case the returned values are not enough to fill the modal
             this.listenTo(this.paginator.valuesCollection, 'update', this.checkScroll);
             this.listenTo(this.paginator.valuesCollection, 'update change', this.updateAll);
@@ -72,17 +89,22 @@ define([
         },
 
         render: function () {
+
             this.$el.html(this.html);
 
             this.$loading = this.$('.loading-spinner');
             this.$error = this.$('.parametric-select-error');
             this.$empty = this.$('.parametric-select-empty');
             this.$all = this.$('.parametric-value-all-label');
+            this.$input = this.$('.js-text-input');
 
             // don't show 'all' checkbox until we've loaded some values
             this.$all.toggleClass('hide', true);
             this.$all.find('input').iCheck({ checkboxClass: 'icheckbox-hp' });
+
             this.listView.setElement(this.$('ul.values-list')).render();
+
+
 
             this.updateAll();
             this.updateLoading();
@@ -96,6 +118,7 @@ define([
          * if an external change may have affected this condition.
          */
         checkScroll: function () {
+           console.log('checkScroll');
             _.defer(function () {
                 if (this.$el.is(':visible') && this.el.scrollHeight - this.el.scrollTop - this.el.offsetHeight < INFINITE_SCROLL_OFFSET) {
                     // The Paginator will not fetch if a request is already in flight so we don't need to check that here
@@ -103,8 +126,16 @@ define([
                 }
             }.bind(this));
         },
+        search: function() {
+            _.debounce(function () {
+                const search = this.$input.val();
+                const matches = this.paginator.valuesCollection.filter(function (model) {
+                return searchMatches(model.get('displayValue'),search);
+                })
+                }.bind(this),200)},
 
         updateAll: function () {
+
             // throttle: when 'all' is toggled, it toggles lots of checkboxes, each of which
             // triggers this handler
             _.throttle(function () {
@@ -134,6 +165,7 @@ define([
 
         updateEmpty: function () {
             if (this.$empty) {
+                console.log('updateEmpty');
                 const empty = this.paginator.stateModel.get('empty');
                 this.$empty.toggleClass('hide', !empty);
             }
@@ -141,6 +173,7 @@ define([
 
         updateError: function () {
             if (this.$error) {
+                console.log('updateError');
                 const error = this.paginator.stateModel.get('error');
                 this.$error.toggleClass('hide', !error);
 
